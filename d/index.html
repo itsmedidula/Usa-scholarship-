@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Trading Dashboard</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --card: #131a2e;
+      --accent: #00e676;
+      --secondary: #2979ff;
+      --danger: #ff5252;
+      --text: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --border: rgba(255, 255, 255, 0.1);
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title span {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .card-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .ticker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .ticker-item {
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background-color: rgba(255, 255, 255, 0.05);
+      transition: var(--transition);
+    }
+
+    .ticker-item:nth-child(odd) {
+      background-color: rgba(0, 230, 118, 0.1);
+    }
+
+    .ticker-item:nth-child(even) {
+      background-color: rgba(41, 121, 255, 0.1);
+    }
+
+    .ticker-item.positive {
+      color: var(--accent);
+    }
+
+    .ticker-item.negative {
+      color: var(--danger);
+    }
+
+    .signal {
+      margin-top: 12px;
+      padding: 8px;
+      background-color: rgba(0, 230, 118, 0.1);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .signal.sell {
+      background-color: rgba(255, 82, 82, 0.1);
+      border-left-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .market-data {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .data-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .data-item strong {
+      color: var(--text);
+    }
+
+    .data-item .value {
+      font-weight: 500;
+    }
+
+    .data-item.positive .value {
+      color: var(--accent);
+    }
+
+    .data-item.negative .value {
+      color: var(--danger);
+    }
+
+    .fear-greed {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 12px;
+      height: 40px;
+      width: 100%;
+      border-radius: 20px;
+      background: linear-gradient(to right, #ff5252, #ffeb3b, #4caf50);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fear-greed-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, #ff5252, #ffeb3b, #4caf50);
+      clip-path: polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%);
+      transition: var(--transition);
+    }
+
+    .fear-greed-value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .fear-greed-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px;
+      font-weight: 500;
+      color: white;
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .futures-data {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .futures-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .futures-item strong {
+      color: var(--text);
+    }
+
+    .futures-item .value {
+      font-weight: 500;
+    }
+
+    .futures-item.positive .value {
+      color: var(--accent);
+    }
+
+    .futures-item.negative .value {
+      color: var(--danger);
+    }
+
+    .whale-trade {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .whale-trade:last-child {
+      border-bottom: none;
+    }
+
+    .whale-trade .amount {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .whale-trade .type {
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background-color: rgba(0, 230, 118, 0.1);
+      color: var(--accent);
+    }
+
+    .whale-trade .type.sell {
+      background-color: rgba(255, 82, 82, 0.1);
+      color: var(--danger);
+    }
+
+    .macro-market {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .macro-market:last-child {
+      border-bottom: none;
+    }
+
+    .macro-market .value {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .macro-market .change {
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    .macro-market .change.down {
+      color: var(--danger);
+    }
+
+    .gainers-losers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .gainers-losers-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .gainers-losers-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .gainers-losers-item .name {
+      color: var(--text);
+    }
+
+    .gainers-losers-item .change {
+      font-weight: 500;
+    }
+
+    .gainers-losers-item.positive .change {
+      color: var(--accent);
+    }
+
+    .gainers-losers-item.negative .change {
+      color: var(--danger);
+    }
+
+    .news-item {
+      margin-top: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .news-item:last-child {
+      border-bottom: none;
+    }
+
+    .news-item .title {
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .news-item .source {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .social-sentiment {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .sentiment-item {
+      text-align: center;
+    }
+
+    .sentiment-item strong {
+      display: block;
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    .sentiment-item .label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .calendar-event {
+      margin-top: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .calendar-event:last-child {
+      border-bottom: none;
+    }
+
+    .calendar-event .time {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .calendar-event .event {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      color: var(--text-secondary);
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: var(--accent);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .trade {
+      margin-top: 12px;
+      padding: 8px;
+      background-color: rgba(0, 230, 118, 0.1);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .trade.sell {
+      background-color: rgba(255, 82, 82, 0.1);
+      border-left-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .active-trades {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .active-trade {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .active-trade .symbol {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .active-trade .pnl {
+      font-weight: 500;
+    }
+
+    .active-trade .pnl.positive {
+      color: var(--accent);
+    }
+
+    .active-trade .pnl.negative {
+      color: var(--danger);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Live Ticker -->
+    <div class="card">
+      <div class="card-title">Live Ticker</div>
+      <div class="ticker" id="ticker"></div>
+    </div>
+
+    <!-- Trading Signals -->
+    <div class="card">
+      <div class="card-title">Trading Signals</div>
+      <div class="card-content">
+        <div id="signals"></div>
+      </div>
+    </div>
+
+    <!-- Market Overview -->
+    <div class="card">
+      <div class="card-title">Market Overview</div>
+      <div class="card-content">
+        <div class="market-data" id="market-overview"></div>
+      </div>
+    </div>
+
+    <!-- Fear & Greed Index -->
+    <div class="card">
+      <div class="card-title">Fear & Greed Index</div>
+      <div class="card-content">
+        <div class="fear-greed" id="fear-greed">
+          <div class="fear-greed-indicator" style="clip-path: polygon(0% 0%, 0% 100%, 50% 100%, 50% 0%);"></div>
+          <div class="fear-greed-value">50</div>
+          <div class="fear-greed-label">Neutral</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Futures Data -->
+    <div class="card">
+      <div class="card-title">Futures Data</div>
+      <div class="card-content">
+        <div class="futures-data" id="futures-data"></div>
+      </div>
+    </div>
+
+    <!-- Whale Trades -->
+    <div class="card">
+      <div class="card-title">Whale Trades</div>
+      <div class="card-content">
+        <div id="whale-trades"></div>
+      </div>
+    </div>
+
+    <!-- Macro Markets -->
+    <div class="card">
+      <div class="card-title">Macro Markets</div>
+      <div class="card-content">
+        <div id="macro-markets"></div>
+      </div>
+    </div>
+
+    <!-- Top Gainers/Losers -->
+    <div class="card">
+      <div class="card-title">Top Gainers/Losers</div>
+      <div class="card-content">
+        <div class="gainers-losers" id="gainers-losers"></div>
+      </div>
+    </div>
+
+    <!-- Crypto News -->
+    <div class="card">
+      <div class="card-title">Crypto News</div>
+      <div class="card-content">
+        <div id="crypto-news"></div>
+      </div>
+    </div>
+
+    <!-- Social Sentiment -->
+    <div class="card">
+      <div class="card-title">Social Sentiment</div>
+      <div class="card-content">
+        <div class="social-sentiment" id="social-sentiment"></div>
+      </div>
+    </div>
+
+    <!-- Economic Calendar -->
+    <div class="card">
+      <div class="card-title">Economic Calendar</div>
+      <div class="card-content">
+        <div id="economic-calendar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Configuration
+    const config = {
+      symbols: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'DOTUSDT'],
+      primarySymbol: 'BTCUSDT',
+      updateIntervals: {
+        ticker: 1000,
+        signals: 30000,
+        marketOverview: 60000,
+        fearAndGreed: 600000,
+        futuresData: 60000,
+        whaleTrades: 5000,
+        macroMarkets: 60000,
+        gainersLosers: 60000,
+        cryptoNews: 300000,
+        socialSentiment: 60000,
+        economicCalendar: 3600000
+      },
+      signalSettings: {
+        stopLossPercent: 0.6,
+        takeProfitPercent: 0.6,
+        maxSignalsToStore: 50,
+        minSignalInterval: 300000,
+        tradeDuration: 900000
+      }
+    };
+
+    // State Management
+    const state = {
+      prices: {},
+      lastUpdates: {},
+      socket: null,
+      abortControllers: {},
+      signalHistory: [],
+      lastSignalTime: null,
+      audioContext: null,
+      activeTrades: []
+    };
+
+    // WebSocket connection for real-time price updates
+    function connectWebSocket() {
+      const wsUrl = 'wss://stream.binance.com:9443/stream?streams=' + 
+        config.symbols.map(symbol => `${symbol.toLowerCase()}@ticker`).join('/');
+      
+      if (state.socket) {
+        state.socket.close();
+      }
+
+      state.socket = new WebSocket(wsUrl);
+
+      state.socket.onopen = () => {
+        console.log('WebSocket connected');
+      };
+
+      state.socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const symbol = data.s;
+        const price = parseFloat(data.p);
+        
+        state.prices[symbol] = price;
+        state.lastUpdates[symbol] = Date.now();
+        
+        // Update ticker display
+        updateTicker();
+        
+        // Trigger signal check
+        if (symbol === config.primarySymbol && Date.now() - (state.lastSignalTime || 0) >= config.signalSettings.minSignalInterval) {
+          generateSignals();
+        }
+      };
+
+      state.socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setTimeout(connectWebSocket, 5000);
+      };
+
+      state.socket.onclose = () => {
+        console.log('WebSocket closed');
+        setTimeout(connectWebSocket, 5000);
+      };
+    }
+
+    // Technical Indicator Functions
+    function calculateEMA(prices, period) {
+      if (prices.length < period) return [];
+      
+      const ema = [];
+      const multiplier = 2 / (period + 1);
+      
+      // Calculate first EMA value using SMA
+      const sma = prices.slice(0, period).reduce((sum, price) => sum + price, 0) / period;
+      ema.push(sma);
+      
+      // Calculate subsequent EMA values
+      for (let i = period; i < prices.length; i++) {
+        const emaValue = (prices[i] - ema[ema.length - 1]) * multiplier + ema[ema.length - 1];
+        ema.push(emaValue);
+      }
+      
+      return ema;
+    }
+
+    function calculateRSI(prices, period) {
+      if (prices.length < period) return [];
+      
+      const rsi = [];
+      let gains = 0;
+      let losses = 0;
+      
+      // Calculate average gains and losses
+      for (let i = 1; i <= period; i++) {
+        const change = prices[i] - prices[i - 1];
+        if (change > 0) {
+          gains += change;
+        } else {
+          losses += Math.abs(change);
+        }
+      }
+      
+      // Initial RSI calculation
+      const initialRS = gains / losses;
+      const initialRSI = 100 - (100 / (1 + initialRS));
+      rsi.push(initialRSI);
+      
+      // Calculate subsequent RSI values
+      for (let i = period + 1; i < prices.length; i++) {
+        const change = prices[i] - prices[i - 1];
+        const avgGain = (gains * (period - 1) + Math.max(change, 0)) / period;
+        const avgLoss = (losses * (period - 1) + Math.abs(Math.min(change, 0))) / period;
+        
+        const rs = avgGain / avgLoss;
+        const rsiValue = 100 - (100 / (1 + rs));
+        
+        rsi.push(rsiValue);
+        
+        gains = avgGain;
+        losses = avgLoss;
+      }
+      
+      return rsi;
+    }
+
+    function calculateMACD(prices) {
+      const ema12 = calculateEMA(prices, 12);
+      const ema26 = calculateEMA(prices, 26);
+      
+      // MACD line
+      const macdLine = [];
+      for (let i = 25; i < prices.length; i++) {
+        macdLine.push(ema12[i - 12] - ema26[i - 26]);
+      }
+      
+      // Signal line (EMA of MACD line)
+      const signalLine = calculateEMA(macdLine, 9);
+      
+      // Histogram
+      const histogram = [];
+      for (let i = 8; i < macdLine.length; i++) {
+        histogram.push(macdLine[i] - signalLine[i - 8]);
+      }
+      
+      return {
+        macdLine,
+        signalLine,
+        histogram
+      };
+    }
+
+    function calculateATR(highs, lows, closes, period) {
+      const atr = [];
+      const trueRanges = [];
+      
+      // Calculate True Range for each period
+      for (let i = 1; i < highs.length; i++) {
+        const tr1 = highs[i] - lows[i];
+        const tr2 = Math.abs(highs[i] - closes[i - 1]);
+        const tr3 = Math.abs(lows[i] - closes[i - 1]);
+        const trueRange = Math.max(tr1, tr2, tr3);
+        trueRanges.push(trueRange);
+      }
+      
+      // Calculate ATR
+      if (trueRanges.length >= period) {
+        // First ATR value is simple average
+        const firstAtr = trueRanges.slice(0, period).reduce((sum, range) => sum + range, 0) / period;
+        atr.push(firstAtr);
+        
+        // Subsequent ATR values use exponential smoothing
+        for (let i = period; i < trueRanges.length; i++) {
+          const multiplier = 2 / (period + 1);
+          const atrValue = (trueRanges[i] - atr[atr.length - 1]) * multiplier + atr[atr.length - 1];
+          atr.push(atrValue);
+        }
+      }
+      
+      return atr;
+    }
+
+    function calculateVWAP(closes, volumes) {
+      const vwap = [];
+      let totalVolume = 0;
+      let totalValue = 0;
+      
+      for (let i = 0; i < closes.length; i++) {
+        totalVolume += volumes[i];
+        totalValue += closes[i] * volumes[i];
+        
+        if (totalVolume > 0) {
+          vwap.push(totalValue / totalVolume);
+        }
+      }
+      
+      return vwap;
+    }
+
+    // Fetch klines data from Binance API
+    async function fetchKlines(symbol, interval = '1m', limit = 100) {
+      const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          // Extract open, high, low, close, volume
+          const opens = data.map(d => parseFloat(d[1]));
+          const highs = data.map(d => parseFloat(d[2]));
+          const lows = data.map(d => parseFloat(d[3]));
+          const closes = data.map(d => parseFloat(d[4]));
+          const volumes = data.map(d => parseFloat(d[5]));
+          
+          return {
+            opens,
+            highs,
+            lows,
+            closes,
+            volumes
+          };
+        }
+      } catch (error) {
+        console.error(`Error fetching klines for ${symbol}:`, error);
+        return null;
+      }
+    }
+
+    // Generate trading signals based on technical indicators
+    async function generateSignals() {
+      const symbol = config.primarySymbol;
+      const klines = await fetchKlines(symbol);
+      
+      if (!klines) return;
+      
+      const { closes, highs, lows, volumes } = klines;
+      const latestClose = closes[closes.length - 1];
+      const latestHigh = highs[highs.length - 1];
+      const latestLow = lows[lows.length - 1];
+      
+      // Calculate indicators
+      const ema9 = calculateEMA(closes, 9)[closes.length - 1];
+      const ema21 = calculateEMA(closes, 21)[closes.length - 1];
+      const rsi = calculateRSI(closes, 14)[closes.length - 1];
+      const macd = calculateMACD(closes).macdLine[closes.length - 1];
+      const atr = calculateATR(highs, lows, closes, 14)[closes.length - 1];
+      const vwap = calculateVWAP(closes, volumes)[closes.length - 1];
+      
+      // Get recent 5 candles data
+      const recentCandles = closes.slice(-5);
+      const minRecentLow = Math.min(...lows.slice(-5));
+      const maxRecentHigh = Math.max(...highs.slice(-5));
+      
+      // Buy signal conditions
+      const buyCondition1 = ema9 > ema21 && latestClose > ema21;
+      const buyCondition2 = rsi < 65 && rsi > 30;
+      const buyCondition3 = macd > 0 && latestClose > vwap;
+      const buyCondition4 = latestClose - minRecentLow < atr * 0.5;
+      
+      // Sell signal conditions
+      const sellCondition1 = ema9 < ema21 && latestClose < ema21;
+      const sellCondition2 = rsi > 35 && rsi < 70;
+      const sellCondition3 = macd < 0 && latestClose < vwap;
+      const sellCondition4 = maxRecentHigh - latestClose < atr * 0.5;
+      
+      // Check if conditions are met
+      const buySignal = buyCondition1 && buyCondition2 && buyCondition3 && buyCondition4;
+      const sellSignal = sellCondition1 && sellCondition2 && sellCondition3 && sellCondition4;
+      
+      // Create signal object
+      const signal = {
+        timestamp: Date.now(),
+        type: buySignal ? 'buy' : sellSignal ? 'sell' : null,
+        symbol: symbol,
+        price: latestClose,
+        ema9: ema9,
+        ema21: ema21,
+        rsi: rsi,
+        macd: macd,
+        atr: atr,
+        vwap: vwap
+      };
+      
+      // Add to signal history
+      if (signal.type) {
+        state.signalHistory.push(signal);
+        state.lastSignalTime = Date.now();
+        
+        // Keep only the most recent signals
+        if (state.signalHistory.length > config.signalSettings.maxSignalsToStore) {
+          state.signalHistory.shift();
+        }
+        
+        // Show notification
+        showNotification(signal);
+        
+        // Play sound alert
+        playSoundAlert();
+        
+        // Add to active trades
+        addActiveTrade(signal);
+      }
+      
+      // Update signals display
+      updateSignals();
+    }
+
+    // Show notification toast
+    function showNotification(signal) {
+      const toast = document.getElementById('toast');
+      toast.textContent = `${signal.type.toUpperCase()} SIGNAL: ${signal.symbol} at $${signal.price.toFixed(2)}`;
+      toast.className = 'toast';
+      
+      if (signal.type === 'buy') {
+        toast.style.backgroundColor = '#00e676';
+      } else {
+        toast.style.backgroundColor = '#ff5252';
+      }
+      
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Play sound alert
+    function playSoundAlert() {
+      // Try Web Audio API first
+      if (!state.audioContext) {
+        state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      
+      const context = state.audioContext;
+      const oscillator = context.createOscillator();
+      const gainNode = context.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(context.destination);
+      
+      oscillator.frequency.setValueAtTime(440, context.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(100, context.currentTime + 0.2);
+      
+      gainNode.gain.setValueAtTime(0.5, context.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+      
+      oscillator.start();
+      oscillator.stop(context.currentTime + 0.2);
+    }
+
+    // Add active trade
+    function addActiveTrade(signal) {
+      const trade = {
+        id: Date.now(),
+        symbol: signal.symbol,
+        type: signal.type,
+        entryPrice: signal.price,
+        entryTime: Date.now(),
+        stopLoss: signal.price * (1 - config.signalSettings.stopLossPercent / 100),
+        takeProfit: signal.price * (1 + config.signalSettings.takeProfitPercent / 100),
+        duration: config.signalSettings.tradeDuration
+      };
+      
+      state.activeTrades.push(trade);
+      
+      // Update active trades display
+      updateActiveTrades();
+      
+      // Set timer for trade expiration
+      setTimeout(() => {
+        const index = state.activeTrades.findIndex(t => t.id === trade.id);
+        if (index !== -1) {
+          state.activeTrades.splice(index, 1);
+          updateActiveTrades();
+        }
+      }, trade.duration);
+    }
+
+    // Update active trades display
+    function updateActiveTrades() {
+      const container = document.querySelector('.active-trades');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      state.activeTrades.forEach(trade => {
+        const now = Date.now();
+        const elapsed = now - trade.entryTime;
+        const remaining = trade.duration - elapsed;
+        const currentPrice = state.prices[trade.symbol] || trade.entryPrice;
+        
+        // Calculate PnL
+        let pnl = 0;
+        if (trade.type === 'buy') {
+          pnl = ((currentPrice - trade.entryPrice) / trade.entryPrice) * 100;
+        } else {
+          pnl = ((trade.entryPrice - currentPrice) / trade.entryPrice) * 100;
+        }
+        
+        const pnlClass = pnl >= 0 ? 'positive' : 'negative';
+        const timeRemaining = Math.ceil(remaining / 1000);
+        
+        const tradeElement = document.createElement('div');
+        tradeElement.className = 'active-trade';
+        tradeElement.innerHTML = `
+          <span class="symbol">${trade.symbol} (${trade.type.toUpperCase()})</span>
+          <span class="pnl ${pnlClass}">${pnl.toFixed(2)}%</span>
+        `;
+        
+        container.appendChild(tradeElement);
+      });
+    }
+
+    // Update ticker display
+    function updateTicker() {
+      const ticker = document.getElementById('ticker');
+      if (!ticker) return;
+      
+      ticker.innerHTML = '';
+      
+      config.symbols.forEach(symbol => {
+        const price = state.prices[symbol];
+        if (price) {
+          const item = document.createElement('div');
+          item.className = 'ticker-item';
+          item.textContent = `${symbol}: $${price.toFixed(2)}`;
+          ticker.appendChild(item);
+        }
+      });
+    }
+
+    // Update signals display
+    function updateSignals() {
+      const signalsContainer = document.getElementById('signals');
+      if (!signalsContainer) return;
+      
+      signalsContainer.innerHTML = '';
+      
+      state.signalHistory.slice(-5).reverse().forEach(signal => {
+        const signalElement = document.createElement('div');
+        signalElement.className = `signal ${signal.type}`;
+        signalElement.innerHTML = `
+          <strong>${signal.type.toUpperCase()} SIGNAL</strong> at $${signal.price.toFixed(2)}
+          <br>EMAs: ${signal.ema9.toFixed(2)} > ${signal.ema21.toFixed(2)}
+          <br>RSI: ${signal.rsi.toFixed(2)} | MACD: ${signal.macd.toFixed(2)}
+          <br>VWAP: ${signal.vwap.toFixed(2)} | ATR: ${signal.atr.toFixed(2)}
+        `;
+        
+        signalsContainer.appendChild(signalElement);
+      });
+    }
+
+    // Fetch market overview data
+    async function fetchMarketOverview() {
+      const url = 'https://api.coingecko.com/api/v3/global';
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data.data) {
+          const marketData = data.data;
+          const items = [
+            { label: 'Total Market Cap', value: formatNumber(marketData.total_market_cap.usd), change: marketData.market_cap_change_percentage_24h_usd },
+            { label: 'Total Volume', value: formatNumber(marketData.total_volume.usd), change: marketData.volume_change_percentage_24h_usd },
+            { label: 'Bitcoin Dominance', value: `${marketData.bitcoin_percentage_of_market_cap}%`, change: null },
+            { label: 'Ethereum Dominance', value: `${marketData.ethereum_percentage_of_market_cap}%`, change: null },
+            { label: 'Altcoin Dominance', value: `${100 - marketData.bitcoin_percentage_of_market_cap - marketData.ethereum_percentage_of_market_cap}%`, change: null }
+          ];
+          
+          const container = document.getElementById('market-overview');
+          container.innerHTML = '';
+          
+          items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'data-item';
+            
+            const changeClass = item.change && item.change > 0 ? 'positive' : item.change && item.change < 0 ? 'negative' : '';
+            const changeText = item.change ? `<span class="value ${changeClass}">${item.change > 0 ? '+' : ''}${item.change.toFixed(2)}%</span>` : '';
+            
+            itemElement.innerHTML = `
+              <strong>${item.label}</strong>
+              <span class="value">${item.value}</span>
+              ${changeText}
+            `;
+            
+            container.appendChild(itemElement);
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching market overview:', error);
+      }
+    }
+
+    // Fetch fear and greed index
+    async function fetchFearAndGreed() {
+      const url = 'https://api.alternative.me/fng/?limit=1';
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data.data && data.data[0]) {
+          const index = data.data[0].value;
+          const classification = data.data[0].classification;
+          
+          const container = document.getElementById('fear-greed');
+          const indicator = container.querySelector('.fear-greed-indicator');
+          const value = container.querySelector('.fear-greed-value');
+          const label = container.querySelector('.fear-greed-label');
+          
+          // Update indicator position
+          const percentage = index / 100;
+          indicator.style.clipPath = `polygon(0% 0%, 0% 100%, ${percentage * 100}% 100%, ${percentage * 100}% 0%)`;
+          
+          // Update value and label
+          value.textContent = index;
+          label.textContent = classification;
+          
+          // Update colors based on classification
+          if (classification === 'Extreme Fear') {
+            indicator.style.background = 'linear-gradient(to right, #ff5252, #ffeb3b)';
+            value.style.color = '#ff5252';
+            label.style.color = '#ff5252';
+          } else if (classification === 'Fear') {
+            indicator.style.background = 'linear-gradient(to right, #ff5252, #ffeb3b)';
+            value.style.color = '#ff5252';
+            label.style.color = '#ff5252';
+          } else if (classification === 'Neutral') {
+            indicator.style.background = 'linear-gradient(to right, #ff5252, #ffeb3b, #4caf50)';
+            value.style.color = '#fff';
+            label.style.color = '#fff';
+          } else if (classification === 'Greed') {
+            indicator.style.background = 'linear-gradient(to right, #ffeb3b, #4caf50)';
+            value.style.color = '#4caf50';
+            label.style.color = '#4caf50';
+          } else if (classification === 'Extreme Greed') {
+            indicator.style.background = 'linear-gradient(to right, #4caf50)';
+            value.style.color = '#4caf50';
+            label.style.color = '#4caf50';
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching fear and greed index:', error);
+      }
+    }
+
+    // Fetch futures data
+    async function fetchFuturesData() {
+      const url = 'https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT';
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const fundingRate = data[0].fundingRate;
+          const nextFundingTime = data[0].nextFundingTime;
+          
+          const container = document.getElementById('futures-data');
+          container.innerHTML = '';
+          
+          const items = [
+            { label: 'Funding Rate', value: `${fundingRate > 0 ? '+' : ''}${fundingRate * 100}%`, change: fundingRate > 0 ? 'positive' : 'negative' },
+            { label: 'Next Funding Time', value: formatDateTime(nextFundingTime), change: null },
+            { label: 'Open Interest', value: '$1.2B', change: 'positive' },
+            { label: 'Change 24h', value: '+5.2%', change: 'positive' }
+          ];
+          
+          items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = `futures-item ${item.change}`;
+            
+            itemElement.innerHTML = `
+              <strong>${item.label}</strong>
+              <span class="value">${item.value}</span>
+            `;
+            
+            container.appendChild(itemElement);
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching futures data:', error);
+      }
+    }
+
+    // Fetch whale trades
+    async function fetchWhaleTrades() {
+      const url = 'https://api.binance.com/api/v3/trades?symbol=BTCUSDT&limit=50';
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const container = document.getElementById('whale-trades');
+          container.innerHTML = '';
+          
+          // Filter large trades
+          const whaleTrades = data.filter(trade => parseFloat(trade.qty) > 100);
+          
+          whaleTrades.slice(0, 5).forEach(trade => {
+            const tradeElement = document.createElement('div');
+            tradeElement.className = 'whale-trade';
+            
+            const type = parseFloat(trade.price) > parseFloat(trade.price) ? 'buy' : 'sell';
+            const amount = parseFloat(trade.qty) * parseFloat(trade.price);
+            
+            tradeElement.innerHTML = `
+              <span class="amount">$${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <span class="type ${type}">${type.toUpperCase()}</span>
+            `;
+            
+            container.appendChild(tradeElement);
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching whale trades:', error);
+      }
+    }
+
+    // Fetch macro markets data
+    async function fetchMacroMarkets() {
+      const container = document.getElementById('macro-markets');
+      container.innerHTML = '';
+      
+      const macroData = [
+        { name: 'SP500', value: '4,350.25', change: '+0.42%' },
+        { name: 'NASDAQ', value: '13,890.15', change: '+0.78%' },
+        { name: 'DXY', value: '104.25', change: '-0.12%' },
+        { name: 'Gold', value: '$1,950.75', change: '+0.35%' },
+        { name: '10Y Treasury', value: '3.50%', change: '-0.02%' }
+      ];
+      
+      macroData.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'macro-market';
+        
+        const changeClass = item.change.startsWith('+') ? 'positive' : 'negative';
+        
+        itemElement.innerHTML = `
+          <strong>${item.name}</strong>
+          <span class="value">${item.value}</span>
+          <span class="change ${changeClass}">${item.change}</span>
+        `;
+        
+        container.appendChild(itemElement);
+      });
+    }
+
+    // Fetch top gainers and losers
+    async function fetchGainersLosers() {
+      const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h';
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const container = document.getElementById('gainers-losers');
+          container.innerHTML = '';
+          
+          // Get top gainers and losers
+          const gainers = data.slice(0, 5).sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h);
+          const losers = data.slice(0, 5).sort((a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h);
+          
+          // Display gainers
+          const gainersContainer = document.createElement('div');
+          gainersContainer.className = 'gainers-losers-list';
+          gainersContainer.innerHTML = '<strong>Gainers</strong>';
+          
+          gainers.forEach(coin => {
+            const item = document.createElement('div');
+            item.className = 'gainers-losers-item positive';
+            item.innerHTML = `
+              <span class="name">${coin.name}</span>
+              <span class="change">${coin.price_change_percentage_24h > 0 ? '+' : ''}${coin.price_change_percentage_24h.toFixed(2)}%</span>
+            `;
+            gainersContainer.appendChild(item);
+          });
+          
+          container.appendChild(gainersContainer);
+          
+          // Display losers
+          const losersContainer = document.createElement('div');
+          losersContainer.className = 'gainers-losers-list';
+          losersContainer.innerHTML = '<strong>Losers</strong>';
+          
+          losers.forEach(coin => {
+            const item = document.createElement('div');
+            item.className = 'gainers-losers-item negative';
+            item.innerHTML = `
+              <span class="name">${coin.name}</span>
+              <span class="change">${coin.price_change_percentage_24h > 0 ? '+' : ''}${coin.price_change_percentage_24h.toFixed(2)}%</span>
+            `;
+            losersContainer.appendChild(item);
+          });
+          
+          container.appendChild(losersContainer);
+        }
+      } catch (error) {
+        console.error('Error fetching gainers and losers:', error);
+      }
+    }
+
+    // Fetch crypto news
+    async function fetchCryptoNews() {
+      const url = 'https://min-api.cryptocompare.com/data/v2/news/?lang=EN';
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data.Data && data.Data.length > 0) {
+          const container = document.getElementById('crypto-news');
+          container.innerHTML = '';
+          
+          data.Data.slice(0, 5).forEach(news => {
+            const item = document.createElement('div');
+            item.className = 'news-item';
+            
+            item.innerHTML = `
+              <div class="title">${news.title}</div>
+              <div class="source">${news.source}</div>
+            `;
+            
+            container.appendChild(item);
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching crypto news:', error);
+      }
+    }
+
+    // Fetch social sentiment
+    async function fetchSocialSentiment() {
+      const container = document.getElementById('social-sentiment');
+      container.innerHTML = '';
+      
+      const sentimentData = [
+        { label: 'Twitter Sentiment', value: 'Positive', percentage: '62%' },
+        { label: 'Reddit Sentiment', value: 'Neutral', percentage: '48%' },
+        { label: 'Google Trends', value: 'Increasing', percentage: '35%' }
+      ];
+      
+      sentimentData.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'sentiment-item';
+        
+        itemElement.innerHTML = `
+          <strong>${item.percentage}</strong>
+          <div class="label">${item.label}</div>
+        `;
+        
+        container.appendChild(itemElement);
+      });
+    }
+
+    // Fetch economic calendar
+    async function fetchEconomicCalendar() {
+      const container = document.getElementById('economic-calendar');
+      container.innerHTML = '';
+      
+      const calendarData = [
+        { time: '10:00 AM', event: 'Fed Chair Speech', impact: 'High' },
+        { time: '1:00 PM', event: 'US CPI Report', impact: 'High' },
+        { time: '3:00 PM', event: 'Eurozone Inflation', impact: 'Medium' },
+        { time: '5:00 PM', event: 'UK GDP Report', impact: 'Medium' }
+      ];
+      
+      calendarData.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'calendar-event';
+        
+        itemElement.innerHTML = `
+          <div class="time">${item.time}</div>
+          <div class="event">${item.event}</div>
+        `;
+        
+        container.appendChild(itemElement);
+      });
+    }
+
+    // Format number with commas
+    function formatNumber(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Format date time
+    function formatDateTime(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleString();
+    }
+
+    // Initialize dashboard
+    async function initDashboard() {
+      // Connect WebSocket
+      connectWebSocket();
+      
+      // Initialize signal history from localStorage
+      const savedSignals = localStorage.getItem('signalHistory');
+      if (savedSignals) {
+        state.signalHistory = JSON.parse(savedSignals);
+      }
+      
+      // Update signals display
+      updateSignals();
+      
+      // Start periodic updates
+      setInterval(updateTicker, config.updateIntervals.ticker);
+      setInterval(fetchMarketOverview, config.updateIntervals.marketOverview);
+      setInterval(fetchFearAndGreed, config.updateIntervals.fearAndGreed);
+      setInterval(fetchFuturesData, config.updateIntervals.futuresData);
+      setInterval(fetchWhaleTrades, config.updateIntervals.whaleTrades);
+      setInterval(fetchMacroMarkets, config.updateIntervals.macroMarkets);
+      setInterval(fetchGainersLosers, config.updateIntervals.gainersLosers);
+      setInterval(fetchCryptoNews, config.updateIntervals.cryptoNews);
+      setInterval(fetchSocialSentiment, config.updateIntervals.socialSentiment);
+      setInterval(fetchEconomicCalendar, config.updateIntervals.economicCalendar);
+      
+      // Initial data fetches
+      fetchMarketOverview();
+      fetchFearAndGreed();
+      fetchFuturesData();
+      fetchWhaleTrades();
+      fetchMacroMarkets();
+      fetchGainersLosers();
+      fetchCryptoNews();
+      fetchSocialSentiment();
+      fetchEconomicCalendar();
+      
+      // Generate initial signals
+      generateSignals();
+      
+      // Save signal history periodically
+      setInterval(() => {
+        localStorage.setItem('signalHistory', JSON.stringify(state.signalHistory));
+      }, 60000);
+    }
+
+    // Start the dashboard
+    initDashboard();
+  </script>
+</body>
+</html>
