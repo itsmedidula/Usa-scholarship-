@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVIATOR SIGNAL</title>
+<style>
+  /* 🔥 Blogger navbar hide */
+  #navbar-iframe { display: none !important; }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at top, #000000, #0a0a0a, #101010);
+    color: #fff;
+    overflow: hidden;
+    min-height: 100vh;
+  }
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(45deg, red, orange);
+    opacity: 0.25;
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0% { transform: translateY(100vh) scale(0.3); opacity: 0.2; }
+    50% { opacity: 0.5; }
+    100% { transform: translateY(-10vh) scale(1); opacity: 0.1; }
+  }
+  .header { text-align: center; margin-top: 30px; z-index: 100; }
+  .title {
+    font-size: clamp(36px, 8vw, 70px);
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #ff0000, #ffcc00, #00ff99, #00ccff, #ff00ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rgbShift 6s linear infinite;
+  }
+  @keyframes rgbShift {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+  }
+  .card {
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(10px);
+    padding: 30px 20px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    margin: 20px auto;
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.3);
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  input {
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 10px;
+    background: rgba(40, 40, 40, 0.9);
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+  }
+  input::placeholder { color: #ff4444; opacity: 0.8; }
+  button {
+    width: 100%;
+    background: linear-gradient(90deg, #ff0044, #ff6600);
+    border: none;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+    margin-top: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover { transform: scale(1.05); box-shadow: 0 0 20px #ffcc00; }
+  .error { color: #ff4444; font-size: 16px; margin-top: 10px; }
+  .result {
+    margin-top: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    display: none;
+    color: #fff;
+    background: linear-gradient(90deg, #ff0000, #ff9900, #ff0000);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 0 15px red;
+    animation: pulse 1.5s infinite alternate;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 10px red; transform: scale(1); }
+    100% { box-shadow: 0 0 20px yellow; transform: scale(1.05); }
+  }
+  .live-time {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ff4444;
+    text-shadow: 0 0 15px #fff;
+    margin-bottom: 15px;
+  }
+  .hidden { display: none; }
+  @media (max-width: 500px) {
+    .card { padding: 25px 15px; width: 92%; }
+    input, button { font-size: 16px; }
+    .live-time { font-size: 28px; }
+  }
+</style>
+<link rel="me" href="https://www.blogger.com/profile/06418759430615642488" />
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+<!-- --><style type="text/css">@import url(//www.blogger.com/static/v1/v-css/navbar/3334278262-classic.css);
+div.b-mobile {display:none;}
+</style>
+
+</head>
+<body><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/3071257205675703711?origin\x3dhttps://aviatorhex.blogspot.com',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script>
+<div id="bubbles"></div>
+
+<div class="header">
+  <div class="title">AVIATOR SIGNAL</div>
+</div>
+
+<div id="loginCard" class="card">
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <div id="loginError" class="error"></div>
+</div>
+
+<div id="signalCard" class="card hidden">
+  <div class="live-time" id="liveTime">--:--:--</div>
+  <input type="text" id="crash" placeholder="Enter Crash Point (e.g. 10.01)">
+  <input type="text" id="round" placeholder="Enter Round Time (HH:MM:SS)">
+  <button onclick="getSignal()">Get Signal</button>
+  <div id="output" class="result"></div>
+</div>
+
+<script>
+/* bubbles background animation */
+const bubblesContainer = document.getElementById("bubbles");
+for (let i = 0; i < 35; i++) {
+  const bubble = document.createElement("div");
+  bubble.classList.add("bubble");
+  const size = Math.random() * 30 + 10;
+  bubble.style.width = size + 'px';
+  bubble.style.height = size + 'px';
+  bubble.style.left = Math.random() * 100 + 'vw';
+  bubble.style.animationDuration = (12 + Math.random() * 10) + 's';
+  bubblesContainer.appendChild(bubble);
+}
+
+/* live time (Sri Lanka) */
+function updateTime() {
+  const live = document.getElementById("liveTime");
+  const opts = { timeZone: 'Asia/Colombo', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+  const now = new Intl.DateTimeFormat('en-GB', opts).format(new Date());
+  live.textContent = now;
+}
+setInterval(updateTime, 1000); updateTime();
+
+/* login system */
+function login() {
+  const user = document.getElementById("username").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  const errorBox = document.getElementById("loginError");
+  if (user === "2004" && pass === "111") {
+    document.getElementById("loginCard").classList.add("hidden");
+    document.getElementById("signalCard").classList.remove("hidden");
+    errorBox.textContent = "";
+    
+  } else {
+    errorBox.textContent = "Invalid Username or Password!";
+  }
+}
+
+/* signal generator */
+function getSignal() {
+  const crash = document.getElementById('crash').value.trim();
+  const round = document.getElementById('round').value.trim();
+  const out = document.getElementById('output');
+
+  if (!crash.includes('.') || !round.includes(':')) {
+    out.textContent = "⚠️ Invalid format!";
+    out.style.display = 'block';
+    return;
+  }
+
+  out.textContent = "⏳ Calculating...";
+  out.style.display = 'block';
+
+  const parts = crash.split('.');
+  const crashMin = parseInt(parts[0], 10) || 0;
+  const crashSec = parseInt(parts[1].padEnd(2, '0'), 10) || 0;
+  const t = round.split(':').map(x => parseInt(x, 10));
+
+  if (t.length !== 3) { out.textContent = "⚠️ Invalid Round Time"; return; }
+
+  let h = t[0], m = t[1], s = t[2];
+  m += crashMin; s += crashSec;
+  if (s >= 60) { m += Math.floor(s / 60); s %= 60; }
+  if (m >= 60) { h += Math.floor(m / 60); m %= 60; }
+
+  let total = h * 3600 + m * 60 + s;
+  let before = Math.max(0, total - 30);
+  let after = total + 30;
+
+  function fmt(sec) {
+    const hh = String(Math.floor(sec / 3600)).padStart(2, '0');
+    const mm = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+    const ss = String(sec % 60).padStart(2, '0');
+    return `${hh}:${mm}:${ss}`;
+  }
+
+  setTimeout(() => {
+    out.innerHTML = `🔥 Signal Range:<br><span style="color:yellow;">${fmt(before)}</span> ➜ <span style="color:#00ffcc;">${fmt(after)}</span>`;
+  
+  }, 4000);
+}
+</script>
+</body>
+</html>
